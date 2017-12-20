@@ -3,19 +3,18 @@ const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const itemRouter = require('./routers/item.router');
 const uuid = require('uuid');
-const {BlogPosts} = require('./models');
-const jsonParser = bodyParser.json();
+const {BlogPosts} = require('../models');
 const router = express.Router();
-const app = express();
 
-app.get('/', (req, res) => {
+
+
+router.get('/', (req, res) => {
   // console.log(BlogPosts);
   res.json(BlogPosts.get());
 });
 
-app.post('/', jsonParser, (req, res) => {
+router.post('/', (req, res) => {
   const requiredFields = ['title', 'content', 'author', 'publishDate'];
   for (let i = 0; i < requiredFields.length; i++) {
     const field = requiredFields[i];
@@ -33,18 +32,18 @@ app.post('/', jsonParser, (req, res) => {
 
 
 
-app.delete('/:id', (req, res) => {
+router.delete('/:id', (req, res) => {
   BlogPosts.delete(req.params.id);
   console.log(`Deleted Blog-Post: ${req.params.id}`);
   res.status(204).end();
 });
 
-app.put('/:id', jsonParser, (req, res) => {
+router.put('/:id', (req, res) => {
   const requiredFields = ['title', 'content', 'author', 'publishDate'];
   for (let i = 0; i < requiredFields.length; i++) {
     const field = requiredFields[i];
     if (!(field in req.body)) {
-      const message = `Missing \`${field}\` in request body`
+      const message = `Missing \`${field}\` in request body`;
       console.error(message);
       return res.status(400).send(message);
     }
@@ -65,4 +64,4 @@ app.put('/:id', jsonParser, (req, res) => {
   res.status(204).end();
 });
 
-module.exports = router
+module.exports = router;

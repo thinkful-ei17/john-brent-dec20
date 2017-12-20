@@ -3,17 +3,18 @@ const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const itemRouter = require('./routers/item.router');
+const itemRouter = require('./routers/item-router');
 const uuid = require('uuid');
 const {BlogPosts} = require('./models');
-const jsonParser = bodyParser.json();
 const app = express();
+
+app.use(bodyParser.json());
 
 app.use(morgan('common'));
 
 app.use(express.static('public'));
 
-app.use(itemRouter);
+app.use('/blog-posts',itemRouter);
 
 BlogPosts.create('day1', 'content', 'john', 'publishDate');
 BlogPosts.create('day2', 'foo', 'brent', '111');
