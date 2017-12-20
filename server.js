@@ -1,48 +1,64 @@
 'use strict';
-
 const express = require('express');
-// we'll use morgan to log the HTTP layer
 const morgan = require('morgan');
-// we'll use body-parser's json() method to 
-// parse JSON data sent in requests to this app
 const bodyParser = require('body-parser');
-
-// we import the ShoppingList model, which we'll
-// interact with in our GET endpoint
-const {ShoppingList} = require('./models');
-const {Recipes} = require('./models');
-
+const cors = require('cors');
+// const itemRouter = require('./routers/item.router');
+const uuid = require('uuid');
+const {BlogPosts} = require('./models');
 const jsonParser = bodyParser.json();
 const app = express();
 
-// log the http layer
 app.use(morgan('common'));
 
-// we're going to add some items to ShoppingList
-// so there's some data to look at. Note that 
-// normally you wouldn't do this. Usually your
-// server will simply expose the state of the
-// underlying database.
-ShoppingList.create('beans', 2);
-ShoppingList.create('tomatoes', 3);
-ShoppingList.create('peppers', 4);
-
-Recipes.create('chocolate milk', ['cocoa', 'milk', 'sugar']);
-Recipes.create('strawberry milk', ['strawberry syrup', 'milk', 'sugar']);
-Recipes.create('koolade', ['sugar', 'water', 'magic']);
+app.use(express.static('public'));
 
 
-// when the root of this route is called with GET, return
-// all current ShoppingList items by calling `ShoppingList.get()`
-app.get('/shopping-list', (req, res) => {
-  res.json(ShoppingList.get());
+
+
+BlogPosts.create('day1', 'content', 'john', 'publishDate');
+BlogPosts.create('day2', 'foo', 'brent', '111');
+BlogPosts.create('day3', 'bar', 'author', '222');
+
+
+// Your app should support the four CRUD operations for a blog posts resource.
+// GET and POST requests should go to / blog - posts.
+// DELETE and PUT requests should go to / blog - posts /: id.
+// Use Express router and modularize routes to / blog - posts.
+// Add a couple of blog posts on server load so you'll automatically have some data to look at when the server starts.
+
+app.get('/blog-posts',( req, res)=>{
+  // console.log(BlogPosts);
+  res.json(BlogPosts.get()); 
 });
 
-app.get('/recipes',(req,res)=>{
-  res.json(Recipes.get());
-  console.log('this ran');
+app.post('/blog-posts', jsonParser, (req, res) => {
+  const requiredFields = ['title', 'content', 'author', 'publishDate'];
+  for (let i = 0; i < requiredFields.length; i++) {
+    const field = requiredFields[i];
+    if (!(field in req.body)) {
+      const message = `Missing \`${field}\` in request body`;
+      console.error(message);
+      return res.status(400).send(message);
+    }
+  }
+
+  const item = BlogPosts.create(req.body.title, req.body.content, req.body.author, req.body.publishDate );
+  res.status(201).json(item);
 });
 
-app.listen(process.env.PORT || 8080, () => {
-  console.log(`Your app is listening on port ${process.env.PORT || 8080}`);
+
+
+
+app.delete('/blog-posts/:id', (req, res) => {
+
+});
+
+app.put('/blog-posts/:id',jsonParser, (req, res) => {
+
+});
+
+
+app.listen(8080, () => {
+  console.log(`Your app is listening on port ${8080}`);
 });
